@@ -1,2 +1,2 @@
 # tetrirene
-A jquery tetris clone
+A jquery/htmlcanvas tetris clone I've built in 2012
