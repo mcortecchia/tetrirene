@@ -5,7 +5,12 @@ html{
 }
 
 body{
-	background:				url(../texture.png) #222;
+	background:				url(../background.png) no-repeat center center fixed;
+	
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;	
 	color:					#FAFFA3;
 	font-family:			helvetica, arial;
 	margin:					0px;

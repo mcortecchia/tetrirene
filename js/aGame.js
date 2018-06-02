@@ -11,6 +11,7 @@ var randCircSizeMax = 50;
 var goCrazy = false;
 var gameTime = 0;
 var lastTick = 0;
+var levelUpSeconds = 20;
 var _theGrid = new JGrid(
 	12,  //Larghezza griglia
 	24, //Altezza griglia
@@ -106,11 +107,11 @@ $(document).ready(function(){
 		});
 		
 		
-		this.drawlist.circleArray = new Array();
 		_theGrid.position = {
 			x: ($("#theCanvas").width() - _theGrid.gridWidth  *_theGrid.rectSize) -25, 
 			y: ($("#theCanvas").height() - _theGrid.gridHeight *_theGrid.rectSize) - 55 
 		} 
+		_theGrid.updateAreas();
 		this.createProfiler();
 		
 		/* 	Add the values to be shown in the profiler.  These must be explicitly passed 
@@ -226,7 +227,7 @@ objectsDefinitions.push(['#4dbd03',3,
 	0,1,0
 	]);
 	
-objectsDefinitions.push(['#f70104',3,
+objectsDefinitions.push(['#ff0000',3,
 	0,1,0,
 	0,1,0,
 	0,1,0,
@@ -277,30 +278,43 @@ function JGrid(gridWidth, gridHeight, rectSize) {
 	this.score=0;
 	this.nextobj = null;
 	
-	
-	var rectrotate = {
-		x:0, 
+	var areaWidth = 280;
+	var left = (320 - areaWidth) *.5;
+	var rectdown = {
+		x:left, 
 		y: 456 - 50,
-		width: 320/4,
+		width: areaWidth/4,
 		height: 50
 	},rectright = {
-		x:320/4*3, 
+		x:left + areaWidth/4*3, 
 		y: 456 - 50,
-		width: 320/4,
+		width: areaWidth/4,
 		height: 50
 	},rectleft = {
-		x:320/4*2, 
+		x:left + areaWidth/4*2, 
 		y: 456 - 50,
-		width: 320/4,
+		width: areaWidth/4,
 		height: 50
-	}
-	,rectdown = {
-		x:320/4, 
+	},rectrotate = {
+		x:left + areaWidth/4, 
 		y: 456 - 50,
-		width: 320/4,
+		width: areaWidth/4,
 		height: 50
+	},reactArea = {
+		x: 0-1,
+		y: 0-1, 
+		width: this.gridWidth*this.rectSize +1,
+		height: this.gridHeight*this.rectSize +1
 	}
 	
+	this.updateAreas = function() {
+		reactArea = {
+			x: this.position.x-1,
+			y: this.position.y-1, 
+			width: this.gridWidth*this.rectSize +1,
+			height: this.gridHeight*this.rectSize +1
+		}
+	}
 	
 	this.isInRect = function(pt,rect) {
 		if ((rect.x <= pt.x) && ( pt.x <= (rect.x + rect.width)) &&
@@ -324,6 +338,9 @@ function JGrid(gridWidth, gridHeight, rectSize) {
 		}
 		else if (this.isInRect(pt, rectdown) == true) {
 			this.setKeyDown('40');
+		}
+		else if (this.isInRect(pt, reactArea) == true)  {
+			this.setKeyDown('32');
 		}
 	}
 	
@@ -365,8 +382,8 @@ function JGrid(gridWidth, gridHeight, rectSize) {
 					this.live.position = { x:5, y:0 };
 				
 					this.nextobj= this.randomObject();
-					this.nextobj.position = { x: -2 - (this.nextobj.width)/2
-							, y: 3 - (this.nextobj.height)/2 
+					this.nextobj.position = { x: - 2 - (this.nextobj.width)/2
+							, y:  + 3 - (this.nextobj.height)/2 
 					};
 					this.nextobj.updateBlockPos();
 					
@@ -439,6 +456,8 @@ function JGrid(gridWidth, gridHeight, rectSize) {
 		this.score += points
 	}
 	
+	var game = this;
+	window.setInterval(function() { game.levelUp(); }, levelUpSeconds*1000);
 	
 	this.position = {
 		x : 0,
@@ -486,24 +505,35 @@ function JGrid(gridWidth, gridHeight, rectSize) {
 		theCanvas.context.rect(this.position.x-1-this.rectSize*5,this.position.y-1, 4*this.rectSize +1, 4*this.rectSize +1);
 		theCanvas.context.rect(this.position.x-1-this.rectSize*5,this.position.y-1 + this.rectSize*5, 4*this.rectSize +1, 4*this.rectSize +1);
 		
-		theCanvas.context.strokeStyle = '#FFFFFF';
-		theCanvas.context.fillStyle = '#000000';
-		theCanvas.context.lineWidth = 1;
+		theCanvas.context.strokeStyle = 'rgba(255,255,255,0.5)';
+		theCanvas.context.fillStyle = "rgba(0, 0, 0, 0.3)";
+		theCanvas.context.lineWidth = 2;
 		theCanvas.context.stroke();
 		theCanvas.context.fill();
 		theCanvas.context.closePath();
 		
 		theCanvas.context.beginPath();
 		
-		theCanvas.context.rect(rectrotate.x,rectrotate.y,rectrotate.width-2, rectrotate.height-2);
-		theCanvas.context.rect(rectleft.x,rectleft.y,rectleft.width-2, rectleft.height-2);
-		theCanvas.context.rect(rectright.x,rectright.y,rectright.width-2, rectright.height-2);
-		theCanvas.context.rect(rectdown.x,rectdown.y,rectdown.width-2, rectdown.height-2);
+		var margin =5;
+		theCanvas.context.rect(rectrotate.x+margin,rectrotate.y+margin,rectrotate.width-2-margin*2, rectrotate.height-4-margin*2);
+		theCanvas.context.rect(rectleft.x+margin,rectleft.y+margin,rectleft.width-2-margin*2, rectleft.height-4-margin*2);
+		theCanvas.context.rect(rectright.x+margin,rectright.y+margin,rectright.width-2-margin*2, rectright.height-4-margin*2);
+		theCanvas.context.rect(rectdown.x+margin,rectdown.y+margin,rectdown.width-2-margin*2, rectdown.height-4-margin*2);
 		
-		theCanvas.context.strokeStyle = '#AAAAAA';
-		theCanvas.context.fillStyle = '#000000';
-		theCanvas.context.lineWidth = 2;
+
+		
+		
+		theCanvas.context.strokeStyle = 'rgba(255,255,255,0.9)';
+		theCanvas.context.fillStyle = "rgba(0, 0, 0, 0.3)";
+		theCanvas.context.lineWidth = 4;
 		theCanvas.context.stroke();
+		
+		theCanvas.context.fillStyle = 'rgba(255,255,255,0.9)';
+		theCanvas.context.fillText("ROTATE",rectrotate.x+margin +10 ,rectrotate.y+margin +20);
+		theCanvas.context.fillText(" DOWN ",rectdown.x+margin +10 ,rectdown.y+margin +20);
+		theCanvas.context.fillText("====>>",rectright.x+margin +10 ,rectright.y+margin +20);
+		theCanvas.context.fillText("<<====",rectleft.x+margin +10 ,rectleft.y+margin +20);
+
 		theCanvas.context.closePath();
 		
 		
@@ -813,9 +843,9 @@ function JBlock(grid, r,g,b) {
 	var deadcolor = rgbToHex((r+g+b)/3,(r+g+b)/3,(r+g+b)/3);
 	var deadcolorborder = rgbToHex((r+g+b)/3 -10,(r+g+b)/3 -10,(r+g+b)/3 -10);
 	
-	var colorborder =  rgbToHex(r-10,g-10,b-10);
+	var colorborder =  "rgba(255,255,255,0.1)";
 
-	this.stroke = '#' + colorborder.toString(16);
+	this.stroke = colorborder;
 	this.fill = '#' + color.toString(16);
 	this.grid = grid;
 	this.status = 0;
@@ -850,9 +880,12 @@ function JBlock(grid, r,g,b) {
 					this.grid.rectSize-1 - margin * 2);
 			theCanvas.context.strokeStyle = this.stroke;
 			theCanvas.context.fillStyle = this.fill;
+			
+			theCanvas.context.lineWidth = 0;
+			theCanvas.context.fill();
 			theCanvas.context.lineWidth = 1;
 			theCanvas.context.stroke();
-			theCanvas.context.fill();
+			//theCanvas.context.fill();
 			theCanvas.context.closePath();
 		}
 	}
