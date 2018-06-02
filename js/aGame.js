@@ -1,3 +1,6 @@
+
+
+
 var theCanvas;
 var srcWidth = 320;
 var srcHeight = 456;
@@ -204,7 +207,7 @@ $(document).ready(function(){
 	
 	$(window).trigger('resize');
 	/* 	INITIALIZATION AREA - END */
-		$("#theCanvas").bind("touchstart mousedown", function(e) {
+		$("#theCanvas").bind("click tap", function(e) {
 			var pt = getCursorPosition(e);
 			pt = {
 					x: pt.x * ( srcWidth / $("#theCanvas").width()), 
