@@ -1,6 +1,3 @@
-
-
-
 var theCanvas;
 var srcWidth = 320;
 var srcHeight = 456;
@@ -8,10 +5,9 @@ var srcHeight = 456;
 var frameCount = 0;
 var randCircSizeMin = 10;
 var randCircSizeMax = 50;
-var goCrazy = false;
 var gameTime = 0;
 var lastTick = 0;
-var levelUpSeconds = 20;
+var levelUpSeconds = 30;
 var _theGrid = new JGrid(
 	12,  //Larghezza griglia
 	24, //Altezza griglia
@@ -20,6 +16,14 @@ var _theGrid = new JGrid(
 
 var _scale = 1;
 var lastKeycode = '';
+
+
+	
+function randomBackground() {
+	
+	var num = Math.floor(Math.random()* 6) + 1;
+	$("body").css("background-image", "url('./background"+num.toString()+".png')")
+}
 
 function stopScrolling( touchEvent ) { touchEvent.preventDefault(); }
 document.addEventListener( 'touchstart' , stopScrolling , false );
@@ -56,6 +60,17 @@ $(window).resize( function() {
 	}
 });
 
+
+function switchFullScreen() {
+	if ($.fullscreen.isFullScreen())
+	{
+		$.fullscreen.exit()
+	}
+	else {
+		$("body").fullscreen();
+	}
+}
+
 function makeUnselectable(node) {
     if (node.nodeType == 1) {
         node.unselectable = true;
@@ -72,6 +87,10 @@ $(document).ready(function(){
 	/* 	INITIALIZATION AREA - BEGIN
 	*	Canvas setup and run loop are defined here.
 	*/
+
+	randomBackground();
+
+
 	$(window).keydown( function(event) {
 		lastKeycode = event.keyCode;
 		_theGrid.setKeyDown(lastKeycode);
@@ -305,6 +324,17 @@ function JGrid(gridWidth, gridHeight, rectSize) {
 		y: 0-1, 
 		width: this.gridWidth*this.rectSize +1,
 		height: this.gridHeight*this.rectSize +1
+	}, rectfullscreen = {
+		x:left, 
+		y: 456 - 110,
+		width: areaWidth/4,
+		height: 50
+	}
+	rectlevel = {
+		x:left-2, 
+		y: 85,
+		width: areaWidth/4,
+		height: 50
 	}
 	
 	this.updateAreas = function() {
@@ -326,6 +356,8 @@ function JGrid(gridWidth, gridHeight, rectSize) {
 	} 
 	
 	this.handleClick = function(pt) {
+
+
 		console.log('handle click on ' + pt.x + ',' +pt.y);
 		if (this.isInRect(pt, rectrotate) == true) {
 			this.setKeyDown('38');
@@ -342,12 +374,16 @@ function JGrid(gridWidth, gridHeight, rectSize) {
 		else if (this.isInRect(pt, reactArea) == true)  {
 			this.setKeyDown('32');
 		}
+		else if (this.isInRect(pt, rectfullscreen) == true)  {
+			switchFullScreen();
+		}
 	}
 	
 	this.levelUp = function() {
 		this.level++;
 		this.dieingSpeed *= 0.80;
 		this.stepSpeed *= 0.80;
+		randomBackground();
 	}
 	
 	var stIngame = 1, stStartMenu = 0, stGameOver = 2, stPausing = 3;
@@ -360,7 +396,8 @@ function JGrid(gridWidth, gridHeight, rectSize) {
 		var num = Math.floor(Math.random()* objectsDefinitions.length);
 		return new liveObject(this,objectsDefinitions[num]);
 	}
-	
+
+
 	
 	this.update = function(msTime) {
 	
@@ -457,8 +494,17 @@ function JGrid(gridWidth, gridHeight, rectSize) {
 	}
 	
 	var game = this;
-	window.setInterval(function() { game.levelUp(); }, levelUpSeconds*1000);
+
+	levelUpCycle = function() {
+		window.setTimeout(function() { 
+			game.levelUp(); 
+			levelUpSeconds *= 1.5;
+			levelUpCycle();
+		}, levelUpSeconds*1000);
+	}
 	
+	levelUpCycle();
+
 	this.position = {
 		x : 0,
 		y : 0
@@ -519,20 +565,34 @@ function JGrid(gridWidth, gridHeight, rectSize) {
 		theCanvas.context.rect(rectleft.x+margin,rectleft.y+margin,rectleft.width-2-margin*2, rectleft.height-4-margin*2);
 		theCanvas.context.rect(rectright.x+margin,rectright.y+margin,rectright.width-2-margin*2, rectright.height-4-margin*2);
 		theCanvas.context.rect(rectdown.x+margin,rectdown.y+margin,rectdown.width-2-margin*2, rectdown.height-4-margin*2);
+		theCanvas.context.rect(rectfullscreen.x+margin,rectfullscreen.y+margin,rectfullscreen.width-2-margin*2, rectfullscreen.height-4-margin*2);
+		
 		
 
 		
 		
-		theCanvas.context.strokeStyle = 'rgba(255,255,255,0.9)';
-		theCanvas.context.fillStyle = "rgba(0, 0, 0, 0.3)";
-		theCanvas.context.lineWidth = 4;
+		theCanvas.context.strokeStyle = 'rgba(255,255,255,0.3)';
+		theCanvas.context.fillStyle = "rgba(255, 255, 255, 0.2)";
+		theCanvas.context.lineWidth = 1;
+		theCanvas.context.fill();
 		theCanvas.context.stroke();
 		
-		theCanvas.context.fillStyle = 'rgba(255,255,255,0.9)';
-		theCanvas.context.fillText("ROTATE",rectrotate.x+margin +10 ,rectrotate.y+margin +20);
-		theCanvas.context.fillText(" DOWN ",rectdown.x+margin +10 ,rectdown.y+margin +20);
-		theCanvas.context.fillText("====>>",rectright.x+margin +10 ,rectright.y+margin +20);
-		theCanvas.context.fillText("<<====",rectleft.x+margin +10 ,rectleft.y+margin +20);
+		theCanvas.context.font='20px fontawesome';
+		
+		theCanvas.context.fillStyle = 'rgba(255,255,255,1)';
+		theCanvas.context.textAlign = "center";
+		theCanvas.context.fillText('\uf31e',1+rectfullscreen.x -margin/2 + rectfullscreen.width/2,rectfullscreen.y+margin +26);
+		theCanvas.context.fillText("\uf0e2",1+rectrotate.x -margin/2 + rectrotate.width/2 ,rectrotate.y+margin +26);
+		theCanvas.context.fillText("\uF063",1+rectdown.x -margin/2 + rectdown.width/2 ,rectdown.y+margin +26);
+		theCanvas.context.fillText('\uF061',1+rectright.x -margin/2 + rectright.width/2 ,rectright.y+margin +26);
+		theCanvas.context.fillText('\uF060',1+rectleft.x -margin/2  + rectleft.width/2 ,rectleft.y+margin +26);
+		
+		theCanvas.context.font='12px Helvetica';
+		
+		theCanvas.context.fillText("LEVEL", 1+ rectlevel.x  + rectlevel.width/2 ,rectlevel.y+margin +28);
+
+		theCanvas.context.font='25px Helvetica';
+		theCanvas.context.fillText((this.level + 1).toString(),rectlevel.x  + rectlevel.width/2 ,rectlevel.y+margin +53);
 
 		theCanvas.context.closePath();
 		
