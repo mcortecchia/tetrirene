@@ -21,7 +21,7 @@ var lastKeycode = '';
 	
 function randomBackground() {
 	
-	var num = Math.floor(Math.random()* 6) + 1;
+	var num = Math.floor(Math.random()* 4) + 1;
 	$("body").css("background-image", "url('./background"+num.toString()+".png')")
 }
 
@@ -479,8 +479,10 @@ function JGrid(gridWidth, gridHeight, rectSize) {
 			}		
 
 			this.linescleared ++;
-			points = (points*2) + 10;
+			points  += gridWidth;
 		}
+
+		points *= dr.length;
 		
 		if (this.linescleared>=this.linestocleartogo)
 		{
@@ -595,7 +597,14 @@ function JGrid(gridWidth, gridHeight, rectSize) {
 		theCanvas.context.fillText((this.level + 1).toString(),rectlevel.x  + rectlevel.width/2 ,rectlevel.y+margin +53);
 
 		theCanvas.context.closePath();
+
+		theCanvas.context.font='15px Helvetica';
+		theCanvas.context.fillStyle = 'rgba(255,255,255,1)';
+		theCanvas.context.textAlign = "end";
 		
+
+		theCanvas.context.fillText(this.score.toString(),this.position.x-4 +  this.gridWidth*this.rectSize +1,this.position.y+13);
+
 		
 		if (this.live!=null){
 			this.live.draw();

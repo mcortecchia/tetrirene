@@ -40,5 +40,26 @@
 		<canvas unselectable="on" class="unselectable" id="theCanvas" height='480' width='320'></canvas> 
 		
  	</body> 
- 
+	 <div class="hidden">
+		<script type="text/javascript">
+			<!--//--><![CDATA[//><!--
+				var images = new Array()
+				function preload() {
+					for (i = 0; i < preload.arguments.length; i++) {
+						images[i] = new Image()
+						images[i].src = preload.arguments[i]
+					}
+				}
+				preload(
+					"background1.png",
+					"background2.png",
+					"background3.png",
+					"background4.png",
+					"background5.png",
+					"background6.png",
+					"background7.png"
+				)
+			//--><!]]>
+		</script>
+	</div>
 </html>
